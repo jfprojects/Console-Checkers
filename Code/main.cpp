@@ -3,6 +3,8 @@
 #include "Pawn.h"
 #include "King.h"
 #include "Board.h"
+#include "Game.h"
+#include "Controller.h"
 
 int main() {
 	Coordinate c1 = Coordinate();
@@ -36,6 +38,11 @@ int main() {
 	}
 	std::cout << std::endl;
 
-	Board board = Board();
-	board.displayBoard();
+	//Board board = Board();
+	//board.displayBoard();
+
+	Game game = Game();
+	Controller controller = Controller();
+
+	controller.displayGameState(game);
 }

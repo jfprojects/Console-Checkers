@@ -10,8 +10,7 @@ class Controller {
 
 		void displayMessage(std::string s);
 
-		void displayGameState(Game game);
+		void displayGameState(const Game& game);
 
 	private:
-		// Add a hash table for player names
 };

@@ -41,17 +41,3 @@ int Board::getSize() const {
 const std::vector<std::vector<Piece*>> & Board::getBoardArray() const {
 	return board_array_;
 }
-
-void Board::displayBoard() const {
-	for (int i = 0; i < size_; i++) {
-		for (int j = 0; j < size_; j++) {
-			if (board_array_[i][j]) {
-				std::cout << board_array_[i][j]->getType() << board_array_[i][j]->getPlayer() << " ";
-			}
-			else {
-				std::cout << "   ";
-			}
-		}
-		std::cout << std::endl;
-	}
-}

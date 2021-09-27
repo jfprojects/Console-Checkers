@@ -10,7 +10,6 @@ class Board {
 
 		int getSize() const;
 		const std::vector<std::vector<Piece*>> & getBoardArray() const;
-		void displayBoard() const;
 
 	private:
 		int size_;

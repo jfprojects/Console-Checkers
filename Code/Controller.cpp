@@ -15,12 +15,12 @@ void Controller::displayMessage(std::string s) {
 	std::cout << s << std::endl;
 }
 
-void Controller::displayGameState(Game game) {
+void Controller::displayGameState(const Game& game) {
 	const Board& B = game.getBoard();
 	int size = B.getSize();
 	auto board_array = B.getBoardArray();  // auto will infer const std::vector<std::vector<Piece*>>&
 	
-	// Add code to display player turn
+	std::cout << game.getNameMap().at(0) << "'s turn" << std::endl;  // map [] opertor is not available for const map, must use .at operaator
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
