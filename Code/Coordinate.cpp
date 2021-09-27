@@ -9,13 +9,6 @@ Coordinate::Coordinate(int x, int y) {
 	setCoordinate(x, y);
 }
 
-int Coordinate::getX() {
-	return x_;
-}
-
-int Coordinate::getY() {
-	return y_;
-}
 
 void Coordinate::setCoordinate(int x, int y) {
 	x_ = x;

@@ -14,8 +14,8 @@ King::King(int player) {
 }
 
 std::vector<Coordinate> King::findMoves(Coordinate current_position) {
-	int x = current_position.getX();
-	int y = current_position.getY();
+	int x = current_position.x_;
+	int y = current_position.y_;
 
 	// Define the move deltas
 	std::vector<int> x_deltas;
