@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 class Coordinate {
 	public:
@@ -6,8 +7,8 @@ class Coordinate {
 		Coordinate();  // default constructor
 		Coordinate(int, int);  // two param constructor
 
-		void displayCoordinate();
 		void setCoordinate(int, int); 
+		std::string getCoordinateString();
 
 		bool operator==(const Coordinate&);  // overload == operator
 		bool operator!=(const Coordinate&);  // overload != operator

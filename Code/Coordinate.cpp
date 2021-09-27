@@ -15,8 +15,8 @@ void Coordinate::setCoordinate(int x, int y) {
 	y_ = y;
 }
 
-void Coordinate::displayCoordinate() {
-	std::cout << "(" << x_ << "," << y_ << ")" << std::endl;
+std::string Coordinate::getCoordinateString() {
+	return "(" + std::to_string(x_) + "," + std::to_string(y_) + ")";
 }
 
 bool Coordinate::operator==(const Coordinate& other) {
