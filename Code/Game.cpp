@@ -64,6 +64,52 @@ bool Game::removePiece(Coordinate c) {
 	return board_.removePiece(c);
 }
 
+bool Game::addPiece(Coordinate c, char piece_type, int player) {
+	return board_.addPiece(c, piece_type, player);
+}
+
+int Game::checkPromotion(){
+	/*
+	 Checks board to see if there are any possible promotions
+
+	 @return: -1 no promotions, 0 promotion for playr 0, 1 promotion for player 1
+	 */
+	const auto& board_array = board_.getBoardArray();
+	int board_size = board_.getSize();
+
+	// Player 1 promotion
+	bool player1_promoted = false;
+	for (int j = 0; j < board_size; j++) {
+		if (board_array[0][j]) {
+			if (board_array[0][j]->getPlayer() == 1 && board_array[0][j]->getType() == 'p') {
+				board_.removePiece(Coordinate(0, j));
+				board_.addPiece(Coordinate(0, j), 'k', 1);
+				player1_promoted = true;
+			}
+		}
+	}
+	if (player1_promoted) {
+		return 1;
+	}
+
+	// Player 0 promotion
+	bool player0_promoted = false;
+	for (int j = 0; j < board_size; j++) {
+		if (board_array[board_size-1][j]) {
+			if (board_array[board_size - 1][j]->getPlayer() == 0 && board_array[board_size - 1][j]->getType() == 'p') {
+				board_.removePiece(Coordinate(board_size - 1, j));
+				board_.addPiece(Coordinate(board_size - 1, j), 'k', 0);
+				player0_promoted = true;
+			}
+		}
+	}
+	if (player0_promoted) {
+		return 0;
+	}
+
+	return -1;
+}
+
 void Game::startGame() {
 
 }

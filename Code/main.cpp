@@ -35,15 +35,26 @@ int main() {
 	board.removePiece(Coordinate(3, 1));
 
 	Game game = Game();
-
 	game.displayGameState();
 
 	game.movePiece(Coordinate(2, 0), Coordinate(3, 1));
-
 	game.displayGameState();
 
 	game.removePiece(Coordinate(3, 1));
+	game.displayGameState();
 
+	game.removePiece(Coordinate(0, 0));
+	game.addPiece(Coordinate(0, 0), 'p', 1);
+	game.displayGameState();
+	
+	int player_promotion = game.checkPromotion();
+	game.displayGameState();
+
+	game.removePiece(Coordinate(7, 1));
+	game.addPiece(Coordinate(7, 1), 'p', 0);
+	game.displayGameState();
+
+	int player_promotion_ = game.checkPromotion();
 	game.displayGameState();
 
 	std::optional<Coordinate> c_opt = game.selectPiece();

@@ -66,3 +66,22 @@ bool Board::removePiece(Coordinate c) {
 		return false;
 	}
 }
+
+bool Board::addPiece(Coordinate c, char piece_type, int player) {
+	if (board_array_[c.x_][c.y_]) {
+		return false;
+	}
+	else {
+		if (piece_type == 'p') {
+			board_array_[c.x_][c.y_] = new Pawn(player);
+			return true;
+		}
+		else if (piece_type == 'k') {
+			board_array_[c.x_][c.y_] = new King(player);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+}

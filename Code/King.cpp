@@ -5,12 +5,12 @@
 
 King::King() {
 	player_ = 0;
-	type_ = 'p';
+	type_ = 'k';
 }
 
 King::King(int player) {
 	player_ = player;
-	type_ = 'p';
+	type_ = 'k';
 }
 
 std::vector<Coordinate> King::findMoves(Coordinate current_position) {
