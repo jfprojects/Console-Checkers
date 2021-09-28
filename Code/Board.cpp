@@ -60,6 +60,7 @@ bool Board::removePiece(Coordinate c) {
 	if (board_array_[c.x_][c.y_]) {
 		delete board_array_[c.x_][c.y_];
 		board_array_[c.x_][c.y_] = nullptr;
+		return true;
 	}
 	else {
 		return false;
