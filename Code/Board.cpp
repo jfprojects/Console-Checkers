@@ -1,19 +1,18 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include "Coordinate.h"
 #include "Pawn.h"
 #include "King.h"
 #include "Board.h"
+#include "Controller.h"
 
 Board::Board() {
 	size_ = 8;
 	for (int i = 0; i < size_; i++) {
 		board_array_.push_back(std::vector<Piece*>(size_, nullptr));
 	}
-	//board_array_.push_back(std::vector<std::vector<Piece*>>(size_, std::vector<Piece*>(size_, nullptr)));
-	//board_array_ = std::vector<std::vector<Piece*>>(size_, std::vector<Piece*>(size_, nullptr));  // 8x8 2d matrix of nullptr
-	
 
 	// Fill in white pieces
 	for (int i = 0; i < 3; i++) {
@@ -38,16 +37,31 @@ const std::vector<std::vector<Piece*>> & Board::getBoardArray() const {
 	return board_array_;
 }
 
-void Board::movePiece() {
+bool Board::movePiece(Coordinate c_from, Coordinate c_to) {
 
-}
-
-std::vector<Coordinate> Board::findMoves(Coordinate c) const {
-	std::vector<Coordinate> valid_moves;
-	if (board_array_[c.x_][c.y_]) {
-
+	if (board_array_[c_from.x_][c_from.y_]) {
+		if (board_array_[c_to.x_][c_to.y_]) {
+			controller.displayMessage("There is already a pice at: " + c_to.getCoordinateString());
+			return false;
+		}
+		else {
+			board_array_[c_to.x_][c_to.y_] = board_array_[c_from.x_][c_from.y_];
+			board_array_[c_from.x_][c_from.y_] = nullptr;
+			return true;
+		}
 	}
 	else {
-		return valid_moves;
+		controller.displayMessage("There is no piece at: " + c_from.getCoordinateString());
+		return false;
+	}
+}
+
+bool Board::removePiece(Coordinate c) {
+	if (board_array_[c.x_][c.y_]) {
+		delete board_array_[c.x_][c.y_];
+		board_array_[c.x_][c.y_] = nullptr;
+	}
+	else {
+		return false;
 	}
 }

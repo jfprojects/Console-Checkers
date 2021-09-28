@@ -3,6 +3,7 @@
 #include "Coordinate.h"
 #include "Pawn.h"
 #include "King.h"
+#include "Controller.h"
 
 class Board {
 	public:
@@ -10,9 +11,12 @@ class Board {
 
 		int getSize() const;
 		const std::vector<std::vector<Piece*>> & getBoardArray() const;
+		
+		bool movePiece(Coordinate c_from, Coordinate c_to);  // Moves piece from c_from to c_to, does not handle captures if the move will cause capture
+		bool removePiece(Coordinate c);  // Removes piece from board
 
 	private:
 		int size_;
 		std::vector<std::vector<Piece*>> board_array_;
-
+		Controller controller;
 };

@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include "Game.h"
 
 class Controller {
 	public:
@@ -9,8 +8,6 @@ class Controller {
 		T getInput();
 
 		void displayMessage(std::string s);
-
-		void displayGameState(const Game& game);
 
 	private:
 };
