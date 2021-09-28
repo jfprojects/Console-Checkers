@@ -7,7 +7,7 @@ class Controller {
 		template<typename T>
 		T getInput() const {
 			T input;
-			std::cin >> input;
+			std::getline(std::cin, input);  // std::cin >> input does not handle spaces and causes weird output, use getline instead
 			return input;
 		};
 

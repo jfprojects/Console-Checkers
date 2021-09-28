@@ -33,39 +33,72 @@ bool Game::movePiece(Coordinate c_from, Coordinate c_to) {
 	return board_.movePiece(c_from, c_to);
 }
 
-std::optional<Coordinate> Game::selectPiece() const {
-	controller.displayMessage("Select piece \"x,y\": ");
-	std::string input = controller.getInput<std::string>();
-	const auto& board_array = board_.getBoardArray();
-
-	if (input.length() == 3 && '0' <= input[0] && input[0] <= '9' && input[1]==',' && '0' <= input[2] && input[2] <= '9') {  // Check valid string input
-		Coordinate c = Coordinate(input);
-		if (board_array[c.x_][c.y_]) {  // Check if empty space
-			if (board_array[c.x_][c.y_]->getPlayer() == turn_){  // Check if piece belongs to player
-				return c;
-			}
-			else {
-				controller.displayMessage(input + " belongs to other player");
-				return {};
-			}
-		}
-		else {
-			controller.displayMessage(input + " is an empty space");
-			return {};
-		}
-	}
-	else {
-		controller.displayMessage(input + " is not a valid selection");
-		return {};
-	}
-}
-
 bool Game::removePiece(Coordinate c) {
 	return board_.removePiece(c);
 }
 
 bool Game::addPiece(Coordinate c, char piece_type, int player) {
 	return board_.addPiece(c, piece_type, player);
+}
+
+std::optional<Coordinate> Game::selectPiece() const {
+	controller.displayMessage("Select piece \"x,y\": ");
+	std::string input = controller.getInput<std::string>();
+	int board_size = board_.getSize();
+	const auto& board_array = board_.getBoardArray();
+
+	if (input.length() == 3 
+		&& 0 <= input[0]-'0' && input[0]-'0' <= board_size-1 
+		&& input[1] == ','
+		&& 0 <= input[2]-'0' && input[2]-'0' <= board_size-1) {  // Check valid string input
+																 // IMPORTANT: Will need to check using regex if board_size >= 11
+		Coordinate c = Coordinate(input);
+		if (board_array[c.x_][c.y_]) {  // Check if empty space
+			if (board_array[c.x_][c.y_]->getPlayer() == turn_) {  // Check if piece belongs to player
+				controller.displayMessage("You have selected: " + std::string(1, board_array[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n');  // char_arr + char + char_arr is NOT ALLOWED
+																																								// char_arr + char WILL GIVE NONSENSE
+				return c;
+			}
+			else {
+				controller.displayMessage(input + " belongs to other player\n");
+				return {};
+			}
+		}
+		else {
+			controller.displayMessage(input + " is an empty space\n");
+			return {};
+		}
+	}
+	else {
+		controller.displayMessage(input + " contains invalid syntax\n");
+		return {};
+	}
+
+	controller.displayMessage("You have selected");
+}
+
+std::optional<std::vector<Coordinate>> Game::getMoves() const {
+	int board_size = board_.getSize();
+
+	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
+	std::string input = controller.getInput<std::string>();
+	int i = 0;
+	std::vector<Coordinate> moves;
+	while (i < input.length()) {
+
+		if (0 <= input[i] - '0' && input[i] - '0' <= board_size - 1
+			&& input[i + 1] == ','
+			&& 0 <= input[i+2] - '0' && input[i+2] - '0' <= board_size - 1) { // IMPORTANT: Will need to check using regex if board_size >= 11
+
+			moves.push_back(Coordinate(input.substr(i, 3)));
+		}
+		else {
+			controller.displayMessage(input + " contains invalid syntax\n");
+			return {};
+		}
+		i += 4;
+	}
+	return moves;
 }
 
 int Game::checkPromotion(){
@@ -109,6 +142,31 @@ int Game::checkPromotion(){
 
 	return -1;
 }
+
+void Game::Turn() {
+	// Select Piece
+	std::optional<Coordinate> c_opt = selectPiece();
+	while (true) {
+		if (c_opt) {
+			break;
+		}
+		c_opt = selectPiece();
+	}
+	Coordinate selected_coordinate = *c_opt;
+	Piece* selected_piece = board_.getBoardArray()[selected_coordinate.x_][selected_coordinate.y_];
+
+	//// Request moves
+	//while (true) {
+	//	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
+	//	std::string moves_input = controller.getInput<std::string>();
+
+	//	int i = 0;
+	//	while (i < moves_input.length()) {
+	//		if (i % 4 == 0) {}
+	//	}
+	//}
+}
+	
 
 void Game::startGame() {
 

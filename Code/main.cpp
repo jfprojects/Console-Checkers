@@ -37,7 +37,7 @@ int main() {
 	Game game = Game();
 	game.displayGameState();
 
-	game.movePiece(Coordinate(2, 0), Coordinate(3, 1));
+	/*game.movePiece(Coordinate(2, 0), Coordinate(3, 1));
 	game.displayGameState();
 
 	game.removePiece(Coordinate(3, 1));
@@ -55,16 +55,18 @@ int main() {
 	game.displayGameState();
 
 	int player_promotion_ = game.checkPromotion();
-	game.displayGameState();
+	game.displayGameState();*/
 
-	std::optional<Coordinate> c_opt = game.selectPiece();
-	//while (true) {
-	//	c_opt = game.selectPiece();
-	//	if (c_opt) {
-	//		break;
-	//	}
-	//}
-	//Coordinate c = *c_opt;
-
-	//std::cout << c.getCoordinateString() << std::endl;
+	std::optional<std::vector<Coordinate>> c_vec_opt = game.getMoves();
+	while (true) {
+		if (c_vec_opt) {
+			break;
+		}
+		c_vec_opt = game.getMoves();
+	}
+	std::vector<Coordinate> moves = *c_vec_opt;
+	
+	for (int i = 0; i < moves.size(); i++) {
+		std::cout << moves[i].getCoordinateString() << std::endl;
+	}
 }

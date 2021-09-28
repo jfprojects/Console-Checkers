@@ -23,8 +23,11 @@ public:
 	bool addPiece(Coordinate c, char piece_type, int player);
 
 	std::optional<Coordinate> selectPiece() const;  // Move to private once Turn function implemented
-	
+	std::optional<std::vector<Coordinate>> getMoves() const;
+
 	int checkPromotion();
+
+	void Turn();
 
 	void startGame();
 	
