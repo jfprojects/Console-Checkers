@@ -5,9 +5,13 @@
 class Controller {
 	public:
 		template<typename T>
-		T getInput();
+		T getInput() const {
+			T input;
+			std::cin >> input;
+			return input;
+		};
 
-		void displayMessage(std::string s);
+		void displayMessage(std::string s) const;
 
 	private:
 };
