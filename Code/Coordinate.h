@@ -5,10 +5,11 @@ class Coordinate {
 	public:
 
 		Coordinate();  // default constructor
+		Coordinate(std::string);  // single string param constructor
 		Coordinate(int, int);  // two param constructor
 
 		void setCoordinate(int, int); 
-		std::string getCoordinateString();
+		std::string getCoordinateString() const;
 
 		bool operator==(const Coordinate&);  // overload == operator
 		bool operator!=(const Coordinate&);  // overload != operator
