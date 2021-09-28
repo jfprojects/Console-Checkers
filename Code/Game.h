@@ -2,12 +2,13 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <optional>
+
 #include "Coordinate.h"
 #include "Pawn.h"
 #include "King.h"
 #include "Board.h"
 #include "Controller.h"
-
 
 class Game {
 public:
@@ -20,6 +21,8 @@ public:
 	bool movePiece(Coordinate c_from, Coordinate c_to); 
 	bool removePiece(Coordinate c);
 
+	std::optional<Coordinate> selectPiece() const;
+
 	void startGame();
 	
 	void displayGameState();
@@ -29,4 +32,5 @@ private:
 	std::map<int, std::string> name_map_;
 	Board board_ = Board();
 	Controller controller;
+
 };

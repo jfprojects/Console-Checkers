@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <optional>
 
 #include "Coordinate.h"
 #include "Pawn.h"
@@ -30,6 +31,33 @@ const Board& Game::getBoard() const{
 
 bool Game::movePiece(Coordinate c_from, Coordinate c_to) {
 	return board_.movePiece(c_from, c_to);
+}
+
+std::optional<Coordinate> Game::selectPiece() const {
+	controller.displayMessage("Select piece \"x,y\": ");
+	std::string input = controller.getInput<std::string>();
+	const auto& board_array = board_.getBoardArray();
+
+	if (input.length() == 3 && '0' <= input[0] && input[0] <= '9' && input[1]==',' && '0' <= input[2] && input[2] <= '9') {  // Check valid string input
+		Coordinate c = Coordinate(input);
+		if (board_array[c.x_][c.y_]) {  // Check if empty space
+			if (board_array[c.x_][c.y_]->getPlayer() == turn_){  // Check if piece belongs to player
+				return c;
+			}
+			else {
+				controller.displayMessage(input + " belongs to other player");
+				return {};
+			}
+		}
+		else {
+			controller.displayMessage(input + " is an empty space");
+			return {};
+		}
+	}
+	else {
+		controller.displayMessage(input + " is not a valid selection");
+		return {};
+	}
 }
 
 bool Game::removePiece(Coordinate c) {

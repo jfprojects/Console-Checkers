@@ -1,4 +1,8 @@
 #include <iostream>
+#include <vector>
+#include <map>
+#include <optional>
+
 #include "Coordinate.h"
 #include "Pawn.h"
 #include "King.h"
@@ -41,5 +45,15 @@ int main() {
 	game.removePiece(Coordinate(3, 1));
 
 	game.displayGameState();
-	
+
+	std::optional<Coordinate> c_opt = game.selectPiece();
+	//while (true) {
+	//	c_opt = game.selectPiece();
+	//	if (c_opt) {
+	//		break;
+	//	}
+	//}
+	//Coordinate c = *c_opt;
+
+	//std::cout << c.getCoordinateString() << std::endl;
 }
