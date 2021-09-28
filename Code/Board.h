@@ -8,7 +8,7 @@
 class Board {
 	public:
 		Board();
-
+		Board(const Board& b);
 		int getSize() const;
 		const std::vector<std::vector<Piece*>> & getBoardArray() const;
 		

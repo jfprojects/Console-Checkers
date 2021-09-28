@@ -29,6 +29,30 @@ Board::Board() {
 	}
 }
 
+Board::Board(const Board& b) {
+	const auto& board_array = b.getBoardArray();
+	size_ = b.getSize();
+
+	for (int i = 0; i < size_; i++) {
+		board_array_.push_back(std::vector<Piece*>(size_, nullptr));
+	}
+
+	for (int i = 0; i < size_; i++) {
+		for (int j = 0; j < size_; j++) {
+			if (board_array[i][j]) {
+				switch (board_array[i][j]->getType()) {
+				case 'p':
+					board_array_[i][j] = new Pawn(board_array[i][j]->getPlayer());
+					break;
+				case 'k':
+					board_array_[i][j] = new King(board_array[i][j]->getPlayer());
+					break;
+				}
+			}
+		}
+	}
+}
+
 int Board::getSize() const {
 	return size_;
 }
