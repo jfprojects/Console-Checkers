@@ -2,6 +2,7 @@
 #include <vector>
 #include "Coordinate.h"
 #include "King.h"
+#include "Board.h"
 
 King::King() {
 	player_ = 0;
@@ -13,9 +14,9 @@ King::King(int player) {
 	type_ = 'k';
 }
 
-std::vector<Coordinate> King::findMoves(Coordinate current_position) {
-	int x = current_position.x_;
-	int y = current_position.y_;
+std::vector<Coordinate> King::findMoves(Coordinate selection, const Board& board) {
+	int x = selection.x_;
+	int y = selection.y_;
 
 	// Define the move deltas
 	std::vector<int> x_deltas;

@@ -3,6 +3,8 @@
 #include "Coordinate.h"
 #include "Piece.h"
 
+class Board;
+
 class King : public Piece {
 public:
 	//using Piece::Piece;  // inherit ALL base class constructors
@@ -10,5 +12,5 @@ public:
 	King();
 	King(int player);
 
-	std::vector<Coordinate> findMoves(Coordinate c);
+	std::vector<Coordinate> findMoves(Coordinate selection, const Board& board);
 };
