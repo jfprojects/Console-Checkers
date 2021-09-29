@@ -61,7 +61,27 @@ const std::vector<std::vector<Piece*>> & Board::getBoardArray() const {
 	return board_array_;
 }
 
+bool Board::checkOnBoard(Coordinate c) const {
+	int x = c.x_;
+	int y = c.y_;
+
+	if (x < 0 || x >= size_ || y < 0 || y >= size_) {
+		return false;
+	}
+	
+	return true;
+}
+
 bool Board::movePiece(Coordinate c_from, Coordinate c_to) {
+	if (!checkOnBoard(c_from)) {
+		controller.displayMessage(c_from.getCoordinateString() + "is not on the board");
+		return false;
+	}
+
+	if (!checkOnBoard(c_to)) {
+		controller.displayMessage(c_to.getCoordinateString() + "is not on the board");
+		return false;
+	}
 
 	if (board_array_[c_from.x_][c_from.y_]) {
 		if (board_array_[c_to.x_][c_to.y_]) {
