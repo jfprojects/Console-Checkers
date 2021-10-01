@@ -15,9 +15,15 @@ class Board {
 		bool checkOnBoard(Coordinate c) const;
 		bool checkValidSelection(Coordinate c, int player) const;
 
-		bool movePiece(Coordinate c_from, Coordinate c_to);  // Moves piece from c_from to c_to, does not handle captures if the move will cause capture
-		bool removePiece(Coordinate c);  // Removes piece from board
+		// These are basic piece movement/manipulations functions that do not involve game logic
+		bool movePiece(Coordinate c_from, Coordinate c_to);
+		bool removePiece(Coordinate c);
 		bool addPiece(Coordinate c, char piece_type, int player);
+
+		// These are realistic movement/manipulations that account for game logic
+		bool checkMove(Coordinate c_from, Coordinate c_to);
+		bool executeMove(Coordinate c_from, Coordinate c_to);
+		void attemptPromotion();
 
 		void displayBoardArray() const;
 

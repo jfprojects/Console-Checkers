@@ -151,6 +151,55 @@ bool Board::addPiece(Coordinate c, char piece_type, int player) {
 	}
 }
 
+bool Board::checkMove(Coordinate c_from, Coordinate c_to) {
+	std::vector<Coordinate> possible_moves = board_array_[c_from.x_][c_from.y_]->findMoves(c_from, *this);
+	if (std::find(possible_moves.begin(), possible_moves.end(), c_to) != possible_moves.end()) {
+		return true;
+	}
+	return false;
+}
+
+bool Board::executeMove(Coordinate c_from, Coordinate c_to) {
+	/*
+	THIS FUNCTION SHOULD ONLY BE CALLED FOR VALID MOVES. CHECK IF MOVE IS VALID WITH .checkMove() BEFORE CALLINNG
+	Moves piece from c_from to c_to and will perform capture on board.
+	return: bool indicating if capture was made
+	*/
+	movePiece(c_from, c_to);
+	if (std::abs(c_to.x_ - c_from.x_) == 2) {
+		Coordinate c_mid = Coordinate((c_to.x_ + c_from.x_) / 2, (c_to.y_ + c_from.y_) / 2);
+		removePiece(c_mid);
+		return true;
+	}
+	return false;
+}
+
+void Board::attemptPromotion() {
+	/*
+	 Checks board to see if there are any possible promotions and performs promotions if available
+	 */
+
+	// Player 1 promotion
+	for (int j = 0; j < size_; j++) {
+		if (board_array_[0][j]) {
+			if (board_array_[0][j]->getPlayer() == 1 && board_array_[0][j]->getType() == 'p') {
+				removePiece(Coordinate(0, j));
+				addPiece(Coordinate(0, j), 'k', 1);
+			}
+		}
+	}
+
+	// Player 0 promotion
+	for (int j = 0; j < size_; j++) {
+		if (board_array_[size_ - 1][j]) {
+			if (board_array_[size_ - 1][j]->getPlayer() == 0 && board_array_[size_ - 1][j]->getType() == 'p') {
+				removePiece(Coordinate(size_ - 1, j));
+				addPiece(Coordinate(size_ - 1, j), 'k', 0);
+			}
+		}
+	}
+}
+
 void Board::displayBoardArray() const {
 
 	for (int i = 0; i < size_; i++) {
