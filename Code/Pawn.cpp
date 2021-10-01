@@ -40,7 +40,6 @@ std::vector<Coordinate> Pawn::findMoves(Coordinate selection, const Board& board
 		int x_to = x + x_deltas[i];
 		int y_to = y + y_deltas[i];
 		Coordinate move = Coordinate(x_to, y_to);
-		std::cout << player_ << selection.getCoordinateString() << " " << move.getCoordinateString() << std::endl;
 		if (board.checkOnBoard(move)) {
 			if (std::abs(x_deltas[i]) == 1) {
 				if (!board_array[x_to][y_to]){
