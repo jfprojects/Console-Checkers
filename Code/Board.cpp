@@ -72,6 +72,27 @@ bool Board::checkOnBoard(Coordinate c) const {
 	return true;
 }
 
+bool Board::checkValidSelection(Coordinate c, int player) const {
+	if (!checkOnBoard(c)) {
+		return false;
+	}
+
+	if (board_array_[c.x_][c.y_]) {  // Check if empty space
+		if (board_array_[c.x_][c.y_]->getPlayer() == player) {  // Check if piece belongs to player
+			controller.displayMessage("You have selected: " + std::string(1, board_array_[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n');  // char_arr + char + char_arr is NOT ALLOWED																																	// char_arr + char WILL GIVE NONSENSE
+			return true;
+		}
+		else {
+			controller.displayMessage(c.getCoordinateString() + " belongs to other player\n");
+			return false;
+		}
+	}
+	else {
+		controller.displayMessage(c.getCoordinateString() + " is an empty space\n");
+		return false;
+	}
+}
+
 bool Board::movePiece(Coordinate c_from, Coordinate c_to) {
 	if (!checkOnBoard(c_from)) {
 		controller.displayMessage(c_from.getCoordinateString() + "is not on the board");
@@ -128,4 +149,22 @@ bool Board::addPiece(Coordinate c, char piece_type, int player) {
 			return false;
 		}
 	}
+}
+
+void Board::displayBoardArray() const {
+
+	for (int i = 0; i < size_; i++) {
+		for (int j = 0; j < size_; j++) {
+			if (board_array_[i][j]) {
+				std::string piece_type(1, board_array_[i][j]->getType());
+				std::string player = std::to_string(board_array_[i][j]->getPlayer());
+				controller.displayMessage(piece_type + player);
+			}
+			else {
+				controller.displayMessage("  ");
+			}
+		}
+		controller.displayMessage("\n");
+	}
+	controller.displayMessage("\n\n");
 }
