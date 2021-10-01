@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <optional>
+#include <algorithm>
 
 #include "Coordinate.h"
 #include "Pawn.h"
@@ -41,6 +42,7 @@ bool Game::addPiece(Coordinate c, char piece_type, int player) {
 	return board_.addPiece(c, piece_type, player);
 }
 
+
 std::optional<Coordinate> Game::selectPiece() const {
 	controller.displayMessage("Select piece \"x,y\": ");
 	std::string input = controller.getInput<std::string>();
@@ -53,19 +55,11 @@ std::optional<Coordinate> Game::selectPiece() const {
 		&& 0 <= input[2]-'0' && input[2]-'0' <= board_size-1) {  // Check valid string input
 																 // IMPORTANT: Will need to check using regex if board_size >= 11
 		Coordinate c = Coordinate(input);
-		if (board_array[c.x_][c.y_]) {  // Check if empty space
-			if (board_array[c.x_][c.y_]->getPlayer() == turn_) {  // Check if piece belongs to player
-				controller.displayMessage("You have selected: " + std::string(1, board_array[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n');  // char_arr + char + char_arr is NOT ALLOWED
-																																								// char_arr + char WILL GIVE NONSENSE
-				return c;
-			}
-			else {
-				controller.displayMessage(input + " belongs to other player\n");
-				return {};
-			}
+		if (board_.checkValidSelection(c, turn_)) {
+			controller.displayMessage("You have selected: " + c.getCoordinateString());
+			return c;
 		}
 		else {
-			controller.displayMessage(input + " is an empty space\n");
 			return {};
 		}
 	}
@@ -73,11 +67,9 @@ std::optional<Coordinate> Game::selectPiece() const {
 		controller.displayMessage(input + " contains invalid syntax\n");
 		return {};
 	}
-
-	controller.displayMessage("You have selected");
 }
 
-std::optional<std::vector<Coordinate>> Game::getMoves() const {
+std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 	int board_size = board_.getSize();
 
 	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
@@ -101,28 +93,70 @@ std::optional<std::vector<Coordinate>> Game::getMoves() const {
 	return moves;
 }
 
-int Game::checkPromotion(){
-	/*
-	 Checks board to see if there are any possible promotions
+bool Game::checkMove(Coordinate c_from, Coordinate c_to, Board& board) {
+	std::vector<Coordinate> possible_moves = board.getBoardArray()[c_from.x_][c_from.y_]->findMoves(c_from, board);
+	if (std::find(possible_moves.begin(), possible_moves.end(), c_to) != possible_moves.end()) {
+		return true;
+	}
+	return false;
+}
 
-	 @return: -1 no promotions, 0 promotion for playr 0, 1 promotion for player 1
+bool Game::executeMove(Coordinate c_from, Coordinate c_to, Board& board) {
+	/*
+	Moves piece from c_from to c_to and will perform capture on board.
+	return: bool indicating if capture was made
+	*/
+	board.movePiece(c_from, c_to);
+	if (std::abs(c_to.x_ - c_from.x_) == 2) {
+		Coordinate c_mid = Coordinate((c_to.x_ + c_from.x_) / 2, (c_to.y_ + c_from.y_) / 2);
+		board.removePiece(c_mid);
+		return true;
+	}
+	return false;
+}
+
+bool Game::executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board) {
+	Coordinate current_selection = selection;
+
+	for (std::size_t i=0; i < moves.size(); i++) {
+		Coordinate move = moves[i];
+
+		if (checkMove(current_selection, move, board)) {
+			bool capture_made = executeMove(current_selection, move, board);
+			std::cout << "made capture?: " << capture_made << std::endl;
+			attemptPromotion(board);
+			if (capture_made) {
+				current_selection = move;
+			}
+			else {  // if no capture, subsequent moves are not allowed
+				if (i != moves.size() - 1) {
+					return false;
+				}
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+void Game::attemptPromotion(Board& board){
+	/*
+	 Checks board to see if there are any possible promotions and performs promotions if available
 	 */
-	const auto& board_array = board_.getBoardArray();
-	int board_size = board_.getSize();
+
+	const auto& board_array = board.getBoardArray();
+	int board_size = board.getSize();
 
 	// Player 1 promotion
-	bool player1_promoted = false;
 	for (int j = 0; j < board_size; j++) {
 		if (board_array[0][j]) {
 			if (board_array[0][j]->getPlayer() == 1 && board_array[0][j]->getType() == 'p') {
-				board_.removePiece(Coordinate(0, j));
-				board_.addPiece(Coordinate(0, j), 'k', 1);
-				player1_promoted = true;
+				board.removePiece(Coordinate(0, j));
+				board.addPiece(Coordinate(0, j), 'k', 1);
 			}
 		}
-	}
-	if (player1_promoted) {
-		return 1;
 	}
 
 	// Player 0 promotion
@@ -130,17 +164,11 @@ int Game::checkPromotion(){
 	for (int j = 0; j < board_size; j++) {
 		if (board_array[board_size-1][j]) {
 			if (board_array[board_size - 1][j]->getPlayer() == 0 && board_array[board_size - 1][j]->getType() == 'p') {
-				board_.removePiece(Coordinate(board_size - 1, j));
-				board_.addPiece(Coordinate(board_size - 1, j), 'k', 0);
-				player0_promoted = true;
+				board.removePiece(Coordinate(board_size - 1, j));
+				board.addPiece(Coordinate(board_size - 1, j), 'k', 0);
 			}
 		}
 	}
-	if (player0_promoted) {
-		return 0;
-	}
-
-	return -1;
 }
 
 void Game::Turn() {
@@ -153,7 +181,18 @@ void Game::Turn() {
 		c_opt = selectPiece();
 	}
 	Coordinate selected_coordinate = *c_opt;
-	Piece* selected_piece = board_.getBoardArray()[selected_coordinate.x_][selected_coordinate.y_];
+	
+	while (true) {
+		auto moves = requestMoves();
+		if (moves) {
+			Board temp_board = board_;  // Call copy constructor, temp_board will be modified to verify moves are valid
+
+		}
+		else {
+			controller.displayMessage("Try again");
+			continue;
+		}
+	}
 
 	//// Request moves
 	//while (true) {
@@ -178,7 +217,14 @@ void Game::displayGameState() {
 	
 	controller.displayMessage(name_map_[0] + "'s turn \n\n");
 
+	std::string top_axis = "   ";
+	for (int j = 0; j < board_.getSize(); j++) {
+		top_axis = top_axis + std::to_string(j) + " ";
+	}
+	controller.displayMessage(top_axis + "\n");
+
 	for (int i = 0; i < board_.getSize(); i++) {
+		controller.displayMessage(std::to_string(i) + " ");
 		for (int j = 0; j < board_.getSize(); j++) {
 			if (board_array[i][j]) {
 				std::string piece_type(1, board_array[i][j]->getType());
@@ -191,5 +237,6 @@ void Game::displayGameState() {
 		}
 		controller.displayMessage("\n");
 	}
+
 	controller.displayMessage("\n\n");
 }

@@ -23,9 +23,13 @@ public:
 	bool addPiece(Coordinate c, char piece_type, int player);
 
 	std::optional<Coordinate> selectPiece() const;  // Move to private once Turn function implemented
-	std::optional<std::vector<Coordinate>> getMoves() const;
+	std::optional<std::vector<Coordinate>> requestMoves() const;
 
-	int checkPromotion();
+	bool checkMove(Coordinate c_from, Coordinate c_to, Board& board);
+	bool executeMove(Coordinate c_from, Coordinate c_to, Board& board);
+	void attemptPromotion(Board& board);
+
+	bool executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board);
 
 	void Turn();
 
