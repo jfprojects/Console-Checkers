@@ -47,17 +47,9 @@ bool Game::addPiece(Coordinate c, char piece_type, int player) {
 }
 
 std::optional<Coordinate> Game::selectPiece() const {
-	/*
-	Coordinate(-10, -10) will correspond to skip turn
-	*/
+
 	controller.displayMessage("Select piece \"x,y\": ");
 	std::string input = controller.getInput<std::string>();
-
-	// Check for skip
-	if (input == "skip") {
-		Coordinate skip = Coordinate(-10, -10);
-		return skip;
-	}
 
 	// Check for valid selection
 	int board_size = board_.getSize();
@@ -88,17 +80,11 @@ std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 	/*
 	Request user to innput sequence of corrdinates to represent moves. 
 	Only checks for correct syntax.
-	<Coordinate(-10, -10)> will correspond to skip moves
 	*/
 	int board_size = board_.getSize();
 
 	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
 	std::string input = controller.getInput<std::string>();
-
-	if (input == "skip") {
-		std::vector<Coordinate> skip = { Coordinate(-10, -10) };
-		return skip;
-	}
 
 	int i = 0;
 	std::vector<Coordinate> moves;
@@ -183,11 +169,6 @@ void Game::Turn() {
 		}
 		c_opt = selectPiece();
 	}
-	// Skip
-	if (*c_opt == Coordinate(-10, -10)) {
-		skipTurn("Skipping " + name_map_[turn_] + " turn\n");
-		return;
-	}
 
 	Coordinate selected_coordinate = *c_opt;
 	
@@ -195,11 +176,6 @@ void Game::Turn() {
 	while (true) {
 		auto moves = requestMoves();
 		if (moves) {
-			// Skip
-			if (moves->at(0) == Coordinate(-1,-1)) {
-				skipTurn("Skipping " + name_map_[turn_] + " turn");
-				return;
-			}
 			// Create a copy of board_ and run the moves through this copy to check if the moves are valid. The board_ copy will be modified during this process, which is why we do not want to directly check on board_.
 			Board temp_board = board_;
 			if (executeMoveVector(selected_coordinate, *moves, turn_, temp_board)) {

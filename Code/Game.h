@@ -28,7 +28,7 @@ public:
 	bool executeMove(Coordinate c_from, Coordinate c_to, Board& board);
 	void attemptPromotion(Board& board);
 
-	std::optional<Coordinate> selectPiece() const;  // Move to private once Turn function implemented
+	std::optional<Coordinate> selectPiece() const;
 	std::optional<std::vector<Coordinate>> requestMoves() const;
 
 	bool executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board);
