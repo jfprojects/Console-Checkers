@@ -3,7 +3,11 @@
 
 class Coordinate {
 	public:
-		// NOTE: (-10, -10) is reserved to denote skip turn 
+		/*
+		NOTE: Certain invalid coordinates are reserved to have specific meaning
+		(-10, -10): offer draw
+		(-20, -20): quit
+		*/
 		Coordinate();  // default constructor
 		Coordinate(std::string);  // single string param constructor
 		Coordinate(int, int);  // two param constructor

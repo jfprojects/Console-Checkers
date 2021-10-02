@@ -51,6 +51,16 @@ std::optional<Coordinate> Game::selectPiece() const {
 	controller.displayMessage("Select piece \"x,y\": ");
 	std::string input = controller.getInput<std::string>();
 
+	// Special commands
+	if (input == "quit") {
+		Coordinate dummy_c = Coordinate(-10, -10);
+		return dummy_c;
+	}
+	else if (input == "draw") {
+		Coordinate dummy_c = Coordinate(-20, -20);
+		return dummy_c;
+	}
+
 	// Check for valid selection
 	int board_size = board_.getSize();
 	const auto& board_array = board_.getBoardArray();
@@ -85,6 +95,16 @@ std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 
 	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
 	std::string input = controller.getInput<std::string>();
+
+	// Special commands
+	if (input == "quit") {
+		std::vector<Coordinate> dummy_vector = { Coordinate(-10, -10) };
+		return dummy_vector;
+	}
+	else if (input == "draw") {
+		std::vector<Coordinate> dummy_vector = { Coordinate(-20, -20) };
+		return dummy_vector;
+	}
 
 	int i = 0;
 	std::vector<Coordinate> moves;
@@ -194,6 +214,10 @@ void Game::startGame() {
 	while (true) {
 		Turn();
 	}
+}
+
+void Game::endGame(std::string message) {
+	controller.displayMessage(message);
 }
 
 void Game::displayGameState() {
