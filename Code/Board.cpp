@@ -152,10 +152,34 @@ bool Board::addPiece(Coordinate c, char piece_type, int player) {
 	}
 }
 
+void Board::removeAllPieces() {
+	for (int x = 0; x < size_; x++) {
+		for (int y = 0; y < size_; y++) {
+			removePiece(Coordinate(x, y));
+		}
+	}
+}
+
 bool Board::checkMove(Coordinate c_from, Coordinate c_to) {
 	std::vector<Coordinate> possible_moves = board_array_[c_from.x_][c_from.y_]->findMoves(c_from, *this);
 	if (std::find(possible_moves.begin(), possible_moves.end(), c_to) != possible_moves.end()) {
 		return true;
+	}
+	return false;
+}
+
+bool Board::checkMovePossible(Coordinate c, int player) const {
+	// Loop through array and for every piece that belongs to player, check if it has possible moves
+	for (int x = 0; x < size_; x++) {
+		for (int y = 0; y < size_; y++) {
+			if (board_array_[x][y]) {
+				if (board_array_[x][y]->getPlayer() == player) {
+					if (!board_array_[x][y]->findMoves(c, *this).empty()) {
+						return true;
+					}
+				}	
+			}
+		}
 	}
 	return false;
 }

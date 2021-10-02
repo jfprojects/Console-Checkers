@@ -19,11 +19,15 @@ class Board {
 		bool movePiece(Coordinate c_from, Coordinate c_to);
 		bool removePiece(Coordinate c);
 		bool addPiece(Coordinate c, char piece_type, int player);
+		void removeAllPieces();
 
 		// These are realistic movement/manipulations that account for game logic
 		bool checkMove(Coordinate c_from, Coordinate c_to);
 		bool executeMove(Coordinate c_from, Coordinate c_to);
 		void attemptPromotion();
+
+		// Check if a player has any possible moves
+		bool checkMovePossible(Coordinate c, int player) const;
 
 		void displayBoardArray() const;
 
