@@ -26,7 +26,11 @@ const std::map<int, std::string>& Game::getNameMap() const{
 	return name_map_;
 }
 
-const Board& Game::getBoard() const{
+const Board& Game::getStaticBoard() const{
+	return board_;
+}
+
+Board& Game::getDynamicBoard() {
 	return board_;
 }
 
@@ -42,7 +46,6 @@ bool Game::addPiece(Coordinate c, char piece_type, int player) {
 	return board_.addPiece(c, piece_type, player);
 }
 
-
 std::optional<Coordinate> Game::selectPiece() const {
 	controller.displayMessage("Select piece \"x,y\": ");
 	std::string input = controller.getInput<std::string>();
@@ -55,12 +58,13 @@ std::optional<Coordinate> Game::selectPiece() const {
 		&& 0 <= input[2]-'0' && input[2]-'0' <= board_size-1) {  // Check valid string input
 																 // IMPORTANT: Will need to check using regex if board_size >= 11
 		Coordinate c = Coordinate(input);
-		if (board_.checkValidSelection(c, turn_)) {
-			controller.displayMessage("You have selected: " + c.getCoordinateString());
-			return c;
+		std::string selection_message = board_.checkValidSelection(c, turn_);
+		controller.displayMessage(selection_message);
+		if (selection_message.find("Invalid selection") != std::string::npos) {
+			return {};
 		}
 		else {
-			return {};
+			return c;
 		}
 	}
 	else {
@@ -70,6 +74,10 @@ std::optional<Coordinate> Game::selectPiece() const {
 }
 
 std::optional<std::vector<Coordinate>> Game::requestMoves() const {
+	/*
+	Request user to innput sequence of corrdinates to represent moves. 
+	Only checks for correct syntax.
+	*/
 	int board_size = board_.getSize();
 
 	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
@@ -94,36 +102,36 @@ std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 }
 
 bool Game::checkMove(Coordinate c_from, Coordinate c_to, Board& board) {
-	std::vector<Coordinate> possible_moves = board.getBoardArray()[c_from.x_][c_from.y_]->findMoves(c_from, board);
-	if (std::find(possible_moves.begin(), possible_moves.end(), c_to) != possible_moves.end()) {
-		return true;
-	}
-	return false;
+	return board.checkMove(c_from, c_to);
 }
 
 bool Game::executeMove(Coordinate c_from, Coordinate c_to, Board& board) {
-	/*
-	Moves piece from c_from to c_to and will perform capture on board.
-	return: bool indicating if capture was made
-	*/
-	board.movePiece(c_from, c_to);
-	if (std::abs(c_to.x_ - c_from.x_) == 2) {
-		Coordinate c_mid = Coordinate((c_to.x_ + c_from.x_) / 2, (c_to.y_ + c_from.y_) / 2);
-		board.removePiece(c_mid);
-		return true;
-	}
-	return false;
+	return board.executeMove(c_from, c_to);
+}
+
+void Game::attemptPromotion(Board& board){
+	board.attemptPromotion();
 }
 
 bool Game::executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board) {
+	/*
+	Coordinate selection:			coordinate of selected piece
+	std::vector<Coordinate> moves:	vector of moves corresponding to coordinates
+	int player:						which player's turn
+	Board& board:					the board we want to apply these moves to
+
+	return:							bool indicating if moves were able to be executed successfully
+
+	This function requires "board" argument because it needs to be able to execute moves on copies of ".board_" to verify that the moves are valid.
+	*/
+
 	Coordinate current_selection = selection;
 
-	for (std::size_t i=0; i < moves.size(); i++) {
+	for (std::size_t i = 0; i < moves.size(); i++) {
 		Coordinate move = moves[i];
 
 		if (checkMove(current_selection, move, board)) {
 			bool capture_made = executeMove(current_selection, move, board);
-			std::cout << "made capture?: " << capture_made << std::endl;
 			attemptPromotion(board);
 			if (capture_made) {
 				current_selection = move;
@@ -141,37 +149,9 @@ bool Game::executeMoveVector(Coordinate selection, std::vector<Coordinate> moves
 	return true;
 }
 
-void Game::attemptPromotion(Board& board){
-	/*
-	 Checks board to see if there are any possible promotions and performs promotions if available
-	 */
-
-	const auto& board_array = board.getBoardArray();
-	int board_size = board.getSize();
-
-	// Player 1 promotion
-	for (int j = 0; j < board_size; j++) {
-		if (board_array[0][j]) {
-			if (board_array[0][j]->getPlayer() == 1 && board_array[0][j]->getType() == 'p') {
-				board.removePiece(Coordinate(0, j));
-				board.addPiece(Coordinate(0, j), 'k', 1);
-			}
-		}
-	}
-
-	// Player 0 promotion
-	bool player0_promoted = false;
-	for (int j = 0; j < board_size; j++) {
-		if (board_array[board_size-1][j]) {
-			if (board_array[board_size - 1][j]->getPlayer() == 0 && board_array[board_size - 1][j]->getType() == 'p') {
-				board.removePiece(Coordinate(board_size - 1, j));
-				board.addPiece(Coordinate(board_size - 1, j), 'k', 0);
-			}
-		}
-	}
-}
-
 void Game::Turn() {
+	displayGameState();
+
 	// Select Piece
 	std::optional<Coordinate> c_opt = selectPiece();
 	while (true) {
@@ -182,33 +162,27 @@ void Game::Turn() {
 	}
 	Coordinate selected_coordinate = *c_opt;
 	
+	// Prompt user to input moves until a valid input, then execute moves.
 	while (true) {
 		auto moves = requestMoves();
 		if (moves) {
-			Board temp_board = board_;  // Call copy constructor, temp_board will be modified to verify moves are valid
-
+			Board temp_board = board_;  // Call copy constructor, temp_board will be modified during the verification process
+			if (executeMoveVector(selected_coordinate, *moves, turn_, temp_board)) {
+				executeMoveVector(selected_coordinate, *moves, turn_, board_);
+				break;
+			}
 		}
-		else {
-			controller.displayMessage("Try again");
-			continue;
-		}
+		controller.displayMessage("Your input contains an invalid move, try again");
 	}
 
-	//// Request moves
-	//while (true) {
-	//	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
-	//	std::string moves_input = controller.getInput<std::string>();
-
-	//	int i = 0;
-	//	while (i < moves_input.length()) {
-	//		if (i % 4 == 0) {}
-	//	}
-	//}
+	turn_ = (turn_ + 1) % 2;  // increment turn
 }
 	
 
 void Game::startGame() {
-
+	while (true) {
+		Turn();
+	}
 }
 
 void Game::displayGameState() {

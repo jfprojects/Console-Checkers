@@ -13,7 +13,7 @@ class Board {
 		const std::vector<std::vector<Piece*>> & getBoardArray() const;
 		
 		bool checkOnBoard(Coordinate c) const;
-		bool checkValidSelection(Coordinate c, int player) const;
+		std::string checkValidSelection(Coordinate c, int player) const;
 
 		// These are basic piece movement/manipulations functions that do not involve game logic
 		bool movePiece(Coordinate c_from, Coordinate c_to);

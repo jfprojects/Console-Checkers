@@ -72,25 +72,26 @@ bool Board::checkOnBoard(Coordinate c) const {
 	return true;
 }
 
-bool Board::checkValidSelection(Coordinate c, int player) const {
+std::string Board::checkValidSelection(Coordinate c, int player) const {
+	std::string return_message = "";
+
 	if (!checkOnBoard(c)) {
-		return false;
+		return_message = "Invalid selection: " + c.getCoordinateString() + " is not on the board\n";
 	}
 
 	if (board_array_[c.x_][c.y_]) {  // Check if empty space
 		if (board_array_[c.x_][c.y_]->getPlayer() == player) {  // Check if piece belongs to player
-			controller.displayMessage("You have selected: " + std::string(1, board_array_[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n');  // char_arr + char + char_arr is NOT ALLOWED																																	// char_arr + char WILL GIVE NONSENSE
-			return true;
+			return_message = "You have selected: " + std::string(1, board_array_[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n';  // char_arr + char + char_arr is NOT ALLOWED																																	// char_arr + char WILL GIVE NONSENSE
 		}
 		else {
-			controller.displayMessage(c.getCoordinateString() + " belongs to other player\n");
-			return false;
+			return_message = "Invalid selection: " + c.getCoordinateString() + " belongs to other player\n";
 		}
 	}
 	else {
-		controller.displayMessage(c.getCoordinateString() + " is an empty space\n");
-		return false;
+		return_message = "Invalid selection: " + c.getCoordinateString() + " is an empty space\n";
 	}
+
+	return return_message;
 }
 
 bool Board::movePiece(Coordinate c_from, Coordinate c_to) {
