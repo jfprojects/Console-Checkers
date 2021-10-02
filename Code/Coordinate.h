@@ -3,7 +3,7 @@
 
 class Coordinate {
 	public:
-
+		// NOTE: (-10, -10) is reserved to denote skip turn 
 		Coordinate();  // default constructor
 		Coordinate(std::string);  // single string param constructor
 		Coordinate(int, int);  // two param constructor

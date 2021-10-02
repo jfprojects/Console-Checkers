@@ -33,6 +33,7 @@ public:
 
 	bool executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board);
 
+	void skipTurn(std::string message);
 	void Turn();
 
 	void startGame();

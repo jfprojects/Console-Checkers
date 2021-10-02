@@ -47,8 +47,19 @@ bool Game::addPiece(Coordinate c, char piece_type, int player) {
 }
 
 std::optional<Coordinate> Game::selectPiece() const {
+	/*
+	Coordinate(-10, -10) will correspond to skip turn
+	*/
 	controller.displayMessage("Select piece \"x,y\": ");
 	std::string input = controller.getInput<std::string>();
+
+	// Check for skip
+	if (input == "skip") {
+		Coordinate skip = Coordinate(-10, -10);
+		return skip;
+	}
+
+	// Check for valid selection
 	int board_size = board_.getSize();
 	const auto& board_array = board_.getBoardArray();
 
@@ -77,11 +88,18 @@ std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 	/*
 	Request user to innput sequence of corrdinates to represent moves. 
 	Only checks for correct syntax.
+	<Coordinate(-10, -10)> will correspond to skip moves
 	*/
 	int board_size = board_.getSize();
 
 	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
 	std::string input = controller.getInput<std::string>();
+
+	if (input == "skip") {
+		std::vector<Coordinate> skip = { Coordinate(-10, -10) };
+		return skip;
+	}
+
 	int i = 0;
 	std::vector<Coordinate> moves;
 	while (i < input.length()) {
@@ -149,6 +167,11 @@ bool Game::executeMoveVector(Coordinate selection, std::vector<Coordinate> moves
 	return true;
 }
 
+void Game::skipTurn(std::string message) {
+	turn_ = (turn_ + 1) % 2;  // increment turn
+	controller.displayMessage(message);
+}
+
 void Game::Turn() {
 	displayGameState();
 
@@ -160,13 +183,25 @@ void Game::Turn() {
 		}
 		c_opt = selectPiece();
 	}
+	// Skip
+	if (*c_opt == Coordinate(-10, -10)) {
+		skipTurn("Skipping " + name_map_[turn_] + " turn\n");
+		return;
+	}
+
 	Coordinate selected_coordinate = *c_opt;
 	
 	// Prompt user to input moves until a valid input, then execute moves.
 	while (true) {
 		auto moves = requestMoves();
 		if (moves) {
-			Board temp_board = board_;  // Call copy constructor, temp_board will be modified during the verification process
+			// Skip
+			if (moves->at(0) == Coordinate(-1,-1)) {
+				skipTurn("Skipping " + name_map_[turn_] + " turn");
+				return;
+			}
+			// Create a copy of board_ and run the moves through this copy to check if the moves are valid. The board_ copy will be modified during this process, which is why we do not want to directly check on board_.
+			Board temp_board = board_;
 			if (executeMoveVector(selected_coordinate, *moves, turn_, temp_board)) {
 				executeMoveVector(selected_coordinate, *moves, turn_, board_);
 				break;
@@ -175,7 +210,7 @@ void Game::Turn() {
 		controller.displayMessage("Your input contains an invalid move, try again");
 	}
 
-	turn_ = (turn_ + 1) % 2;  // increment turn
+	turn_ = (turn_ + 1) % 2; 
 }
 	
 
@@ -212,5 +247,5 @@ void Game::displayGameState() {
 		controller.displayMessage("\n");
 	}
 
-	controller.displayMessage("\n\n");
+	controller.displayMessage("\n");
 }
