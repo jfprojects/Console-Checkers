@@ -97,7 +97,7 @@ std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 	*/
 	int board_size = board_.getSize();
 
-	controller.displayMessage("Input moves \"x,y\" (if you want to make multiple jumps, delineate \"x,y\" with \" \"): ");
+	controller.displayMessage("Input move(s): ");
 	std::string input = controller.getInput<std::string>();
 
 	// Special commands
@@ -261,7 +261,7 @@ void Game::Turn() {
 	
 	// Prompt user to input moves until a valid input, then execute moves.
 	while (true) {
-		auto moves = requestMoves()
+		auto moves = requestMoves();
 		if (moves) {
 			// Check special commands
 			bool was_special_command = specialCommand(moves->at(0));
@@ -278,14 +278,22 @@ void Game::Turn() {
 				}
 			}
 		}
-		controller.displayMessage("Your input contains an invalid move, try again");
+		controller.displayMessage("Your input contains an invalid move, try again \n");
 	}
 
 	turn_ = (turn_ + 1) % 2; 
+
+	controller.displayMessage("\n");
+
 }
 	
 
 void Game::startGame() {
+	controller.displayMessage("INSTRUCTIONS \n"
+							  "Board coodinates should be in the form \"x,y\" \n"
+							  "When prompted to move your selected piece, you may enter one or more coordinates. Multiple coordinates should be separated with \" \" and corresponds to multiple jumps \n"
+							  "At any time during the game, you can type \"quit\" to leave the game or \"draw\" to request a draw \n\n");
+
 	game_active_ = true;
 	while (game_active_) {
 		Turn();
