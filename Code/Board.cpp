@@ -73,6 +73,9 @@ bool Board::checkOnBoard(Coordinate c) const {
 }
 
 std::string Board::checkValidSelection(Coordinate c, int player) const {
+	/*
+	return string: description of the check, if the selection was invalid message_string must begin with "Invalid selection" because this string will be checked by other functions
+	*/
 	std::string return_message = "";
 
 	if (!checkOnBoard(c)) {
@@ -81,7 +84,12 @@ std::string Board::checkValidSelection(Coordinate c, int player) const {
 
 	if (board_array_[c.x_][c.y_]) {  // Check if empty space
 		if (board_array_[c.x_][c.y_]->getPlayer() == player) {  // Check if piece belongs to player
-			return_message = "You have selected: " + std::string(1, board_array_[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n';  // char_arr + char + char_arr is NOT ALLOWED																																	// char_arr + char WILL GIVE NONSENSE
+			if (board_array_[c.x_][c.y_]->findMoves(Coordinate(c.x_, c.y_), *this).size() > 0) {  // Check if move is possible
+				return_message = "You have selected: " + std::string(1, board_array_[c.x_][c.y_]->getType()) + "  " + c.getCoordinateString() + '\n';  // char_arr + char + char_arr is NOT ALLOWED; char_arr + char WILL GIVE NONSENSE
+			}
+			else {
+				return_message = "Invalid selection: " + c.getCoordinateString() + " has no possible moves \n";
+			}
 		}
 		else {
 			return_message = "Invalid selection: " + c.getCoordinateString() + " belongs to other player\n";
@@ -168,13 +176,13 @@ bool Board::checkMove(Coordinate c_from, Coordinate c_to) {
 	return false;
 }
 
-bool Board::checkMovePossible(Coordinate c, int player) const {
+bool Board::checkMovePossible(int player) const {
 	// Loop through array and for every piece that belongs to player, check if it has possible moves
 	for (int x = 0; x < size_; x++) {
 		for (int y = 0; y < size_; y++) {
 			if (board_array_[x][y]) {
 				if (board_array_[x][y]->getPlayer() == player) {
-					if (!board_array_[x][y]->findMoves(c, *this).empty()) {
+					if (!board_array_[x][y]->findMoves(Coordinate(x,y), *this).empty()) {
 						return true;
 					}
 				}	

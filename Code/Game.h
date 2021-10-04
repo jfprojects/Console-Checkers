@@ -23,15 +23,24 @@ public:
 	bool movePiece(Coordinate c_from, Coordinate c_to); 
 	bool removePiece(Coordinate c);
 	bool addPiece(Coordinate c, char piece_type, int player);
+	void removeAllPieces();
 
 	bool checkMove(Coordinate c_from, Coordinate c_to, Board& board);
 	bool executeMove(Coordinate c_from, Coordinate c_to, Board& board);
 	void attemptPromotion(Board& board);
+
+	bool checkMovePossible(int player, const Board& board);
 	
+	// User input functions
 	std::optional<Coordinate> selectPiece() const;
 	std::optional<std::vector<Coordinate>> requestMoves() const;
 
 	bool executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board);
+
+	// Special commands
+	bool specialCommand(Coordinate dummy);  
+	void requestDraw();
+	void quit();
 
 	void skipTurn(std::string message);
 	void Turn();
@@ -43,6 +52,7 @@ public:
 
 private:
 	int turn_;
+	bool game_active_;
 	std::map<int, std::string> name_map_;
 	Board board_ = Board();
 	Controller controller;

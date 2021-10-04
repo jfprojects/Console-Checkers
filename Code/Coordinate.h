@@ -5,8 +5,8 @@ class Coordinate {
 	public:
 		/*
 		NOTE: Certain invalid coordinates are reserved to have specific meaning
-		(-10, -10): offer draw
-		(-20, -20): quit
+		(-10, -10): quit
+		(-20, -20): offer draw
 		*/
 		Coordinate();  // default constructor
 		Coordinate(std::string);  // single string param constructor

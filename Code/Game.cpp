@@ -46,6 +46,10 @@ bool Game::addPiece(Coordinate c, char piece_type, int player) {
 	return board_.addPiece(c, piece_type, player);
 }
 
+void Game::removeAllPieces() {
+	board_.removeAllPieces();
+}
+
 std::optional<Coordinate> Game::selectPiece() const {
 
 	controller.displayMessage("Select piece \"x,y\": ");
@@ -106,7 +110,7 @@ std::optional<std::vector<Coordinate>> Game::requestMoves() const {
 		return dummy_vector;
 	}
 
-	int i = 0;
+	unsigned i = 0;
 	std::vector<Coordinate> moves;
 	while (i < input.length()) {
 
@@ -135,6 +139,10 @@ bool Game::executeMove(Coordinate c_from, Coordinate c_to, Board& board) {
 
 void Game::attemptPromotion(Board& board){
 	board.attemptPromotion();
+}
+
+bool Game::checkMovePossible(int player, const Board& board) {
+	return board.checkMovePossible(player);
 }
 
 bool Game::executeMoveVector(Coordinate selection, std::vector<Coordinate> moves, int player, Board& board) {
@@ -173,6 +181,50 @@ bool Game::executeMoveVector(Coordinate selection, std::vector<Coordinate> moves
 	return true;
 }
 
+bool Game::specialCommand(Coordinate c) {
+	/*
+	return bool: indicating if c was a special command 
+	*/
+	if (c == Coordinate(-10, -10)) {
+		endGame(name_map_[turn_] + " has left the game");
+		return true;
+	}
+	else if (c == Coordinate(-20, -20)) {
+		requestDraw();
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void Game::requestDraw() {
+	bool draw_game = false;
+	controller.displayMessage(name_map_[turn_] + " has requested a draw. ");
+	while (true) {
+		controller.displayMessage("Does " + name_map_[(turn_ + 1) % 2] + " accept? y / n \n");
+		std::string opponent_response = controller.getInput<std::string>();
+		if (opponent_response.size() > 0) {
+			if (opponent_response[0] == 'y') {
+				draw_game = true;
+				break;
+			}
+			else if (opponent_response[0] == 'n') {
+				draw_game = false;
+				break;
+			}
+		}
+		controller.displayMessage("Invalid input, try again. ");
+	}
+	if (draw_game) {
+		endGame(name_map_[(turn_ + 1) % 2] + " has accepted you request to draw. The game has ended in a draw.");
+	}
+}
+
+void Game::quit() {
+	endGame(name_map_[turn_] + " has left the game");
+}
+
 void Game::skipTurn(std::string message) {
 	turn_ = (turn_ + 1) % 2;  // increment turn
 	controller.displayMessage(message);
@@ -180,27 +232,50 @@ void Game::skipTurn(std::string message) {
 
 void Game::Turn() {
 	displayGameState();
+	controller.displayMessage(name_map_[turn_] + "'s turn \n");
 
-	// Select Piece
-	std::optional<Coordinate> c_opt = selectPiece();
-	while (true) {
-		if (c_opt) {
-			break;
-		}
-		c_opt = selectPiece();
+	// Check if player has any moves
+	if (!board_.checkMovePossible(turn_)) {
+		skipTurn("No possible moves, ending turn");
+		return;
 	}
 
-	Coordinate selected_coordinate = *c_opt;
+	// Select Piece
+	Coordinate selected_coordinate;
+	while (true) {
+		std::optional<Coordinate> c_opt = selectPiece();
+		if (c_opt) {
+			selected_coordinate = *c_opt;
+			// Check special commands
+			bool was_special_command = specialCommand(selected_coordinate);
+			if (!game_active_) {
+				return;
+			}
+
+			// Break out of loop if input was not a special command
+			if (!was_special_command) {
+				break;
+			}
+		}
+	}
 	
 	// Prompt user to input moves until a valid input, then execute moves.
 	while (true) {
-		auto moves = requestMoves();
+		auto moves = requestMoves()
 		if (moves) {
-			// Create a copy of board_ and run the moves through this copy to check if the moves are valid. The board_ copy will be modified during this process, which is why we do not want to directly check on board_.
-			Board temp_board = board_;
-			if (executeMoveVector(selected_coordinate, *moves, turn_, temp_board)) {
-				executeMoveVector(selected_coordinate, *moves, turn_, board_);
-				break;
+			// Check special commands
+			bool was_special_command = specialCommand(moves->at(0));
+			if (!game_active_) {
+				return;
+			}
+			// If not special command, check if valid input
+			if (!was_special_command) {
+				// Create a copy of board_ and run the moves through this copy to check if the moves are valid. The board_ copy will be modified during this process, which is why we do not want to directly check on board_.
+				Board temp_board = board_;
+				if (executeMoveVector(selected_coordinate, *moves, turn_, temp_board)) {
+					executeMoveVector(selected_coordinate, *moves, turn_, board_);
+					break;
+				}
 			}
 		}
 		controller.displayMessage("Your input contains an invalid move, try again");
@@ -211,20 +286,20 @@ void Game::Turn() {
 	
 
 void Game::startGame() {
-	while (true) {
+	game_active_ = true;
+	while (game_active_) {
 		Turn();
 	}
 }
 
 void Game::endGame(std::string message) {
 	controller.displayMessage(message);
+	game_active_ = false;
 }
 
 void Game::displayGameState() {
 	int board_size = board_.getSize();
 	const auto& board_array = board_.getBoardArray();  // auto will infer std::vector<std::vector<Piece*>> but we need to specify const and &
-	
-	controller.displayMessage(name_map_[0] + "'s turn \n\n");
 
 	std::string top_axis = "   ";
 	for (int j = 0; j < board_.getSize(); j++) {
@@ -246,6 +321,5 @@ void Game::displayGameState() {
 		}
 		controller.displayMessage("\n");
 	}
-
 	controller.displayMessage("\n");
 }

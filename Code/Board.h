@@ -27,7 +27,7 @@ class Board {
 		void attemptPromotion();
 
 		// Check if a player has any possible moves
-		bool checkMovePossible(Coordinate c, int player) const;
+		bool checkMovePossible(int player) const;
 
 		void displayBoardArray() const;
 
